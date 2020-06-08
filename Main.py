@@ -17,12 +17,12 @@ def pathTracing(source,px,boundarys,surface):
     for i in range (5) :
         point = Point(random.uniform(0,500),random.uniform(0,500))
         
-        b = Line(point.x,point.y,source.x,source.y)
+        ray = Line(point.x,point.y,source.x,source.y)
         
-        d = source.distance(point)
+        distance = source.distance(point)
        
-        for j in boundarys:
-            if j.instersect(b):
+        for boundary in boundarys:
+            if boundary.instersect(ray):
                 print("Sí bro")
           
 
@@ -31,9 +31,9 @@ def pathTracing(source,px,boundarys,surface):
        
        
         
-        b.draw(surface)
+        ray.draw(surface)
 
-        d = source.distance(point)
+        distance = source.distance(point)
         #print(d)
 
 
@@ -92,7 +92,7 @@ def _main_():
         #b = Boundary(350,100,350,400)
         boundarys[0].draw(surface)
         sources.draw(surface)
-        b.draw(surface)
+      
         pathTracing(sources,px,boundarys,surface)
         screen.blit(surface, (border, border))
         

@@ -36,4 +36,3 @@ class Point:
     def distance(self, other):
         return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
     
-print(Point(2,4)+Point(8,9))
