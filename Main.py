@@ -34,50 +34,52 @@ def pathTracing(source,px,boundarys,surface):
     #print("p")
     im_file = Image.open("fondo.png")
     ref = np.array(im_file)
-    for i in range (500) :
-        for j in range(500):
-            point = Point(i,j)
+    for i in range (5) :
+        for j in range(1):
+            point = Point(random.uniform(0,500),random.uniform(0,500))
             
             ray = Line(source.x,source.y,point.x,point.y)
-            
+            #ray.draw(surface)
+
             distance = source.distance(point)
-            Inter = False
+            
+            Interseco = False
         
             for boundary in boundarys:
-                if boundary.instersect(ray):
-                    Inter=True
+                if boundary.isInstersect(ray):
+                    Interseco=True
 
 
 
                     dx = ray.cambioX()
                     dy = ray.cambioY()
                     pI = boundary.calcInstersect(ray)
-                    ray.Point2 = boundary.calcInstersect(ray)
-                    if(boundary.orientacion()==0):
-                        pointF = reboteVertical(pI, dx, dy , distance-ray.distance())
-                    else:
-                        pointF = reboteHorizontal(pI, dx, dy , distance-ray.distance())
-                    #ray.Point2 = boundary.calcInstersect(ray)
+                    ray.Point2 = pI
+                    
+                    pointF = reboteVertical(pI, dx, dy , distance-ray.distance())
+                    
+                    
 
                     rayR = Line(pI.x,pI.y,pointF.x,pointF.y)
                 
-                    px[int(pointF.x)][int(pointF.y)]=ref[int(pointF.x)][int(pointF.y)][:3]*1.5
+                    px[int(pointF.y)][int(pointF.x)]=ref[int(pointF.x)][int(pointF.y)][:3]*1.5
                     #rayR.draw(surface)
 
-                    break
+                    
 
-                # print(ray.Point2)
-            if not (Inter):
-                px[int(point.x)][int(point.y)]=ref[int(point.x)][int(point.y)][:3]*1.5
+                 #print(ray.Point2)
+            #if not (Interseco):
+                
+                #px[int(point.y)][int(point.x)]=ref[int(point.x)][int(point.y)][:3]*1.5
                 
             
 
         
         
         
-        
-            
-            #ray.draw(surface)
+
+            print("aiuda")
+            ray.draw(surface)
 
             distance = source.distance(point)
             #print(d)
@@ -114,12 +116,15 @@ def _main_():
 
 
 
+
+
     sources = Point(195, 200)
 
 
-    boundarys = [Line(350,400,350,100),Line(100,400,100,100),Line(350,400,100,400),Line(350,100,100,100)]
+    boundarys = [Line(350,400,350,100),Line(100,400,100,100)]
 
-
+    npimage=(px)
+    surface = pygame.surfarray.make_surface(npimage)
 
     first= True
     while True:
@@ -131,15 +136,16 @@ def _main_():
         screen.fill((255, 255, 255))
 
         # Get a numpy array to display from the simulation
-        npimage=(px)
+        
 
         # Convert to a surface and splat onto screen offset by border width and height
-        surface = pygame.surfarray.make_surface(npimage)
+        
         #b = Boundary(350,100,350,400)
         for i in boundarys:
             i.draw(surface)
         
         sources.draw(surface)
+       
         if first:
             t = threading.Thread(target = pathTracing, args=(sources,px,boundarys,surface) ) # f being the function that tells how the ball should move
             t.setDaemon(True) # Alternatively, you can use "t.daemon = True"

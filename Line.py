@@ -14,6 +14,7 @@ class Line:
 
 
     def draw(self,surface ):
+        print("dfsdf")
         pygame.draw.line(surface, (40,200,200), (self.Point1.x, self.Point1.y), (self.Point2.x, self.Point2.y), 3)
     
     def __str__(self):
@@ -21,11 +22,11 @@ class Line:
 
     
     def distance(self):
-        return math.sqrt((self.Point1.x-self.Point2.x)**2 + (self.Point1.y-self.Point2.y)**2)
+        return self.Point1.distance(self.Point2)
 
     
     #Formula para determinar si existe una interseccion entre 2 lineas
-    def instersect(self, other):
+    def isInstersect(self, other):
         x1 = self.Point1.x
         y1 = self.Point1.y
         x2 = self.Point2.x
