@@ -13,28 +13,74 @@ from Point import *
 
 
 
+def reboteHorizontal(point, dx, dy, distance ):
+    res = Point(0,0)
+    res.x = int(point.x+(dx*distance))
+    res.y = int(point.y+(dy*-1*distance))
+    return res
+
+def reboteVertical(point, dx, dy, distance ):
+    res = Point(0,0)
+    res.x = int(point.x+(dx*-1*distance))
+    res.y = int(point.y+(dy*distance))
+    return res
+
+
+
+
+
+
 def pathTracing(source,px,boundarys,surface):
-    for i in range (5) :
-        point = Point(random.uniform(0,500),random.uniform(0,500))
+    #print("p")
+    im_file = Image.open("fondo.png")
+    ref = np.array(im_file)
+    for i in range (500) :
+        for j in range(500):
+            point = Point(i,j)
+            
+            ray = Line(source.x,source.y,point.x,point.y)
+            
+            distance = source.distance(point)
+            Inter = False
         
-        ray = Line(point.x,point.y,source.x,source.y)
-        
-        distance = source.distance(point)
-       
-        for boundary in boundarys:
-            if boundary.instersect(ray):
-                print("Sí bro")
-          
+            for boundary in boundarys:
+                if boundary.instersect(ray):
+                    Inter=True
 
-       
-       
-       
-       
-        
-        ray.draw(surface)
 
-        distance = source.distance(point)
-        #print(d)
+
+                    dx = ray.cambioX()
+                    dy = ray.cambioY()
+                    pI = boundary.calcInstersect(ray)
+                    ray.Point2 = boundary.calcInstersect(ray)
+                    if(boundary.orientacion()==0):
+                        pointF = reboteVertical(pI, dx, dy , distance-ray.distance())
+                    else:
+                        pointF = reboteHorizontal(pI, dx, dy , distance-ray.distance())
+                    #ray.Point2 = boundary.calcInstersect(ray)
+
+                    rayR = Line(pI.x,pI.y,pointF.x,pointF.y)
+                
+                    px[int(pointF.x)][int(pointF.y)]=ref[int(pointF.x)][int(pointF.y)][:3]*1.5
+                    #rayR.draw(surface)
+
+                    break
+
+                # print(ray.Point2)
+            if not (Inter):
+                px[int(point.x)][int(point.y)]=ref[int(point.x)][int(point.y)][:3]*1.5
+                
+            
+
+        
+        
+        
+        
+            
+            #ray.draw(surface)
+
+            distance = source.distance(point)
+            #print(d)
 
 
 
@@ -71,11 +117,11 @@ def _main_():
     sources = Point(195, 200)
 
 
-    boundarys = [Line(350,100,350,400)]
+    boundarys = [Line(350,400,350,100),Line(100,400,100,100),Line(350,400,100,400),Line(350,100,100,100)]
 
 
 
-
+    first= True
     while True:
         #print("f")
         for event in pygame.event.get():
@@ -90,10 +136,16 @@ def _main_():
         # Convert to a surface and splat onto screen offset by border width and height
         surface = pygame.surfarray.make_surface(npimage)
         #b = Boundary(350,100,350,400)
-        boundarys[0].draw(surface)
+        for i in boundarys:
+            i.draw(surface)
+        
         sources.draw(surface)
-      
-        pathTracing(sources,px,boundarys,surface)
+        if first:
+            t = threading.Thread(target = pathTracing, args=(sources,px,boundarys,surface) ) # f being the function that tells how the ball should move
+            t.setDaemon(True) # Alternatively, you can use "t.daemon = True"
+            t.start()
+            first=False 
+        
         screen.blit(surface, (border, border))
         
 
