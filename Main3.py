@@ -27,7 +27,7 @@ def reboteVertical(point, dx, dy, distance ):
 
 
 
-def reflejo(source, point, surface, px,intence): 
+def reflejo(source, point, surface, px,intence, pintados): 
     #print("pichaaa")
 
     im_file = Image.open("fondo.png")
@@ -49,7 +49,9 @@ def reflejo(source, point, surface, px,intence):
         for i in range(xParaY):
   
             if(x>=0 and x<500 and y>=0 and y<500):
-                px[int(x)][int(y)]=px[int(x)][int(y)][:3]*intence
+                if(not pintados[int(x)][int(y)] ):
+                    px[int(x)][int(y)]=px[int(x)][int(y)][:3]*intence
+                    pintados[int(x)][int(y)] =True
             if(source.x >point.x):
                 x-=1
             else:
@@ -74,22 +76,37 @@ def reflejo(source, point, surface, px,intence):
 
 def pathTracing2(source,px,boundarys,surface,xmin,xmax,ymin,ymax):
     print("FF")
+    pintados = []
+    for i in range(500):
+        fila =[]
+        for j in range(500):
+            fila+=[False]
+        pintados+=[fila]
+
 
     for i in range (1):
         
         #print(i)
         #print(i)
-        for j in range(500):
+        for j in range(360):
 
            
             aleatorios = np.random.normal(0,500,2)
-            point = Point(aleatorios[0], aleatorios[1])
+            point = Point(source.x + math.cos(j)*300, source.y + math.sin(j)*300)
+            if(point.x<0):
+                point.x = 0
+            if(point.x>499):
+                point.x = 499
+            if(point.y<0):
+                point.y = 0
+            if(point.y>499):
+                point.y =499            
           #  print("verga")
             point.x = int(point.x)
             point.y = int(point.y)
             ray = Line(source.x,source.y,point.x,point.y)
            # print(ray.Point2)
-            #ray.draw(surface)
+            ray.draw(surface)
 
             distance = source.distance(point)
             
@@ -122,7 +139,7 @@ def pathTracing2(source,px,boundarys,surface,xmin,xmax,ymin,ymax):
 
                   #  print(pI)
                    # print(pointF)
-                    reflejo(pI, pointF, surface, px,2)
+                   # reflejo(pI, pointF, surface, px,2,pintados)
                     
                     #px[int(pointF.x)][int(pointF.y)]=ref[int(pointF.x)][int(pointF.y)][:3]*1.5
                     #rayR.draw(surface)
@@ -142,10 +159,10 @@ def pathTracing2(source,px,boundarys,surface,xmin,xmax,ymin,ymax):
         
          #   print(ray.Point1)
           #  print(ray.Point2)
-            reflejo(ray.Point1, ray.Point2, surface, px,1.5)
+            #reflejo(ray.Point1, ray.Point2, surface, px,1.5,pintados)
             #print("aiuda")
-           # if(not Interseco):
-                #ray.draw(surface)
+            if(not Interseco):
+                ray.draw(surface)
                 
                # px[int(point.x)][int(point.y)]=ref[int(point.x)][int(point.y)][:3]*2
 
@@ -204,7 +221,8 @@ def _main_():
 
 
 
-
+    npimage=(px)
+    surface = pygame.surfarray.make_surface(npimage)
 
     first= True
     while True:
@@ -217,8 +235,7 @@ def _main_():
 
 
         # Convert to a surface and splat onto screen offset by border width and height
-        npimage=(px)
-        surface = pygame.surfarray.make_surface(npimage)
+
 
         #b = Boundary(350,100,350,400)
         for i in boundarys:
