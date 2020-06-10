@@ -7,7 +7,7 @@ import math
 import threading
 from Line import *
 from Point import *
-
+import time
 
 
 
@@ -27,17 +27,62 @@ def reboteVertical(point, dx, dy, distance ):
 
 
 
+def reflejo(source, point, surface, px): 
+    #print("pichaaa")
 
-
-
-def pathTracing(source,px,boundarys,surface):
-    #print("p")
     im_file = Image.open("fondo.png")
     ref = np.array(im_file)
-    for i in range (5) :
-        for j in range(1):
-            point = Point(random.uniform(0,500),random.uniform(0,500))
+    x = source.x
+    y = source.y
+    
+    
+    distanciaX = abs(point.x-source.x)
+    distanciaY = abs(point.y-source.y)
+    xParaY = distanciaX
+
+    if(distanciaY!=0):
+        xParaY = int(distanciaX/distanciaY)
+
+    while(distanciaX != 0 and distanciaY !=0):
+        #print("BIG F")
+        for i in range(xParaY):
+            if(x>=0 and x<500 and y>=0 and y<500):
+                px[int(x)][int(y)]=ref[int(x)][int(y)][:3]*10
+            if(source.x >point.x):
+                x-=1
+            else:
+                x+=1
+            distanciaX-=1
+        if(source.y >point.y):
+            y-=1
+        else:
+            y+=1
+        distanciaY-=1
+      
+    
+        
             
+
+        
+
+
+
+
+
+
+def pathTracing2(source,px,boundarys,surface,xmin,xmax,ymin,ymax):
+    im_file = Image.open("fondo.png")
+    ref = np.array(im_file)
+    for i in range (xmin,xmax):
+        time.sleep(0.000001)
+        #print(i)
+        #print(i)
+        for j in range(ymin,ymax):
+
+            point = Point(i, j)
+            
+            
+
             ray = Line(source.x,source.y,point.x,point.y)
             #ray.draw(surface)
 
@@ -48,12 +93,15 @@ def pathTracing(source,px,boundarys,surface):
             for boundary in boundarys:
                 if boundary.isInstersect(ray):
                     Interseco=True
-
+                   # print("siiiii")
 
 
                     dx = ray.cambioX()
                     dy = ray.cambioY()
                     pI = boundary.calcInstersect(ray)
+                    pI.x = int (pI.x)
+                    pI.y = int (pI.y)
+
                     ray.Point2 = pI
                     
                     pointF = reboteVertical(pI, dx, dy , distance-ray.distance())
@@ -61,16 +109,25 @@ def pathTracing(source,px,boundarys,surface):
                     
 
                     rayR = Line(pI.x,pI.y,pointF.x,pointF.y)
-                
-                    px[int(pointF.y)][int(pointF.x)]=ref[int(pointF.x)][int(pointF.y)][:3]*1.5
+                    
+
+                   # t = threading.Thread(target = reflejo, args=(pI, pointF, surface, px) ) # f being the function that tells how the ball should move
+                  #  t.setDaemon(True) # Alternatively, you can use "t.daemon = True"
+                 #   t.start()
+                    
+                    reflejo(pI, pointF, surface, px)
+                    
+                    #px[int(pointF.x)][int(pointF.y)]=ref[int(pointF.x)][int(pointF.y)][:3]*1.5
                     #rayR.draw(surface)
 
                     
 
                  #print(ray.Point2)
-            #if not (Interseco):
+
+            #if(not Interseco):
+
                 
-                #px[int(point.y)][int(point.x)]=ref[int(point.x)][int(point.y)][:3]*1.5
+                #px[int(point.x)][int(point.y)]=ref[int(point.x)][int(point.y)][:3]*1
                 
             
 
@@ -78,12 +135,17 @@ def pathTracing(source,px,boundarys,surface):
         
         
 
-            print("aiuda")
-            ray.draw(surface)
+            #print("aiuda")
+            if(not Interseco):
+                #ray.draw(surface)
+                px[int(point.x)][int(point.y)]=ref[int(point.x)][int(point.y)][:3]*2
 
             distance = source.distance(point)
             #print(d)
 
+
+    #t1 = time.time() - start_time 
+    print("Finalizo con 500")
 
 
 
@@ -121,10 +183,13 @@ def _main_():
     sources = Point(195, 200)
 
 
-    boundarys = [Line(350,400,350,100),Line(100,400,100,100)]
+    boundarys = [Line(350,400,350,100)]
 
-    npimage=(px)
-    surface = pygame.surfarray.make_surface(npimage)
+            # Get a numpy array to display from the simulation
+
+
+
+
 
     first= True
     while True:
@@ -135,22 +200,31 @@ def _main_():
 
         screen.fill((255, 255, 255))
 
-        # Get a numpy array to display from the simulation
-        
 
         # Convert to a surface and splat onto screen offset by border width and height
-        
+        npimage=(px)
+        surface = pygame.surfarray.make_surface(npimage)
+
         #b = Boundary(350,100,350,400)
         for i in boundarys:
             i.draw(surface)
         
         sources.draw(surface)
-       
+   
         if first:
-            t = threading.Thread(target = pathTracing, args=(sources,px,boundarys,surface) ) # f being the function that tells how the ball should move
+            t = threading.Thread(target = pathTracing2, args=(sources,px,boundarys,surface,0,250,0,250) ) # f being the function that tells how the ball should move
             t.setDaemon(True) # Alternatively, you can use "t.daemon = True"
             t.start()
-            first=False 
+            t1 = threading.Thread(target = pathTracing2, args=(sources,px,boundarys,surface,250,500,250,500) ) # f being the function that tells how the ball should move
+            t1.setDaemon(True) # Alternatively, you can use "t.daemon = True"
+            t1.start()
+            t2 = threading.Thread(target = pathTracing2, args=(sources,px,boundarys,surface,0,250,250,500) ) # f being the function that tells how the ball should move
+            t2.setDaemon(True) # Alternatively, you can use "t.daemon = True"
+            t2.start()
+            t3 = threading.Thread(target = pathTracing2, args=(sources,px,boundarys,surface,250,500,0,250) ) # f being the function that tells how the ball should move
+            t3.setDaemon(True) # Alternatively, you can use "t.daemon = True"
+            t3.start()
+            first=False
         
         screen.blit(surface, (border, border))
         
