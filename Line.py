@@ -15,7 +15,7 @@ class Line:
 
     def draw(self,surface ):
         #print("dfsdf")
-        pygame.draw.line(surface, (40,200,200), (self.Point1.x, self.Point1.y), (self.Point2.x, self.Point2.y), 1)
+        pygame.draw.line(surface, (182, 149, 192), (self.Point1.x, self.Point1.y), (self.Point2.x, self.Point2.y), 1)
     
     def __str__(self):
         return "[ {}, {}]".format(self.Point1.x, self.Point1.y)
