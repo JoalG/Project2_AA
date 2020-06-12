@@ -122,6 +122,7 @@ def pathTracing2(source,px,boundarys,surface,xmin,xmax,ymin,ymax):
                 continue
            
             aleatorios = np.random.normal(0,500,2)
+            
             point = Point(i,j)
             if(point.x<0):
                 point.x = 0
