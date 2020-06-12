@@ -34,10 +34,6 @@ class PathTracing:
 
 
     def pintarRayo(self, source, point, surface, px,intence,reflejo): 
-        #print("pichaaa")
-
-        im_file = Image.open("fondo.png")
-        ref = np.array(im_file)
 
         puntos = list(bresenham(source.x,source.y,point.x,point.y))
         #print(puntos)
@@ -56,14 +52,13 @@ class PathTracing:
         
         for i in range (1):
             
-            recursos = 5000
+            
             
             for j in range(gMin,gMax):
                 
-                pR  = j
-               # print(pR)
                 
-                point = Point(source.x + math.cos(math.radians(pR))*300, source.y + math.sin(math.radians(pR))*300)
+                
+                point = Point(source.x + math.cos(math.radians(j))*300, source.y + math.sin(math.radians(j))*300)
                 
                 
 
@@ -82,15 +77,14 @@ class PathTracing:
                     continue       
                 if(point.x == 499 and point.y ==0)   :
                     continue        
+                
+                
                 point.x = int(point.x)
                 point.y = int(point.y)
                 ray = Line(source.x,source.y,point.x,point.y)
                 distance = source.distance(point)
                 self.PathTracing(boundarys,ray,surface,px,distance,False)
                 
-
-                
-        print("Finish")
 
 
 
@@ -105,18 +99,18 @@ class PathTracing:
                 dx = ray.cambioX()
                 dy = ray.cambioY()
                 
-                pI = boundary.calcInstersect(ray)
-                pI.x = int (pI.x)
-                pI.y = int (pI.y)
-                ray.Point2 = pI
+                pInterseccion = boundary.calcInstersect(ray)
+                pInterseccion.x = int (pInterseccion.x)
+                pInterseccion.y = int (pInterseccion.y)
+                ray.Point2 = pInterseccion
                 distance = distance-ray.distance()
                 
-                pointF = self.reboteVertical(pI, dx, dy , distance)
-                rayR = Line(pI.x,pI.y,pointF.x,pointF.y)
-                self.PathTracing(boundarys,rayR,surface,px,distance,True)
+
+                #Solo hay rebote vertical
+                pointFinal = self.reboteVertical(pInterseccion, dx, dy , distance)
+                rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
+                self.PathTracing(boundarys,rayRebote,surface,px,distance,True)
                 #self.pathTracing(pI,px,boundarys,surface,90, 270) 
-                
-                
 
         self.pintarRayo(ray.Point1, ray.Point2, surface, px,1.26,reflejo)
 
