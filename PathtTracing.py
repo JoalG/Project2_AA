@@ -42,7 +42,7 @@ class PathTracing:
             if(pixel[0]>=0 and pixel[0]<500 and pixel[1]>=0 and pixel[1]<500):
                 px[int(pixel[0])][int(pixel[1])]=px[int(pixel[0])][int(pixel[1])]*intence
                 if reflejo:
-                    px[int(pixel[0])][int(pixel[1])]=px[int(pixel[0])][int(pixel[1])]*[1,0.5,1]
+                    px[int(pixel[0])][int(pixel[1])]=px[int(pixel[0])][int(pixel[1])]*[10,0.5,10]
 
 
 
@@ -90,29 +90,34 @@ class PathTracing:
 
     def PathTracing(self,boundarys,ray,surface,px,distance,reflejo):
 
-        Interseco = False
-        #No elige el Boundary mas cercano 
-        for boundary in boundarys:
-            if boundary.isInstersect(ray):
-                Interseco=True
-                
-                dx = ray.cambioX()
-                dy = ray.cambioY()
-                
-                pInterseccion = boundary.calcInstersect(ray)
-                pInterseccion.x = int (pInterseccion.x)
-                pInterseccion.y = int (pInterseccion.y)
+            dx = ray.cambioX()
+            dy = ray.cambioY()
+            Interseco = False
+            pInterseccion = ray.Point2
+            #No elige el Boundary mas cercano 
+            for boundary in boundarys:
+
+                if boundary.isInstersect(ray):
+                    Interseco=True
+                    
+
+                    
+                    pInterseccionTemp = boundary.calcInstersect(ray)
+                    pInterseccionTemp.x = int (pInterseccionTemp.x)
+                    pInterseccionTemp.y = int (pInterseccionTemp.y)
+
+                    if(ray.Point1.distance(pInterseccionTemp)<ray.Point1.distance(pInterseccion)):
+                        pInterseccion = pInterseccionTemp
+
+
+            if(Interseco):
                 ray.Point2 = pInterseccion
                 distance = distance-ray.distance()
-                
-
-                #Solo hay rebote vertical
                 pointFinal = self.reboteVertical(pInterseccion, dx, dy , distance)
                 rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
                 self.PathTracing(boundarys,rayRebote,surface,px,distance,True)
-                #self.pathTracing(pI,px,boundarys,surface,90, 270) 
 
-        self.pintarRayo(ray.Point1, ray.Point2, surface, px,1.26,reflejo)
+            self.pintarRayo(ray.Point1, ray.Point2, surface, px,1.26,reflejo)
 
 
 
@@ -142,7 +147,7 @@ class PathTracing:
                 px[i][j]= ref[i][j][:3]*0.6
 
         sources = Point(220, 200)
-        boundarys = [Line(350,400,350,100)]
+        boundarys = [Line(350,400,350,100),Line(300,400,300,200),Line(100,400,100,100)]
 
                 # Get a numpy array to display from the simulation
 
