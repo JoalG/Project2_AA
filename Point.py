@@ -33,6 +33,9 @@ class Point:
         pygame.draw.circle(surface, (40,200,200),(self.x,self.y),5,0)
 
 
+    def draw(self, surface,color):
+        pygame.draw.circle(surface, color,(self.x,self.y),5,0)
+
     def distance(self, other):
         return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
     

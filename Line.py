@@ -16,7 +16,7 @@ class Line:
     def draw(self,surface ):
         #print("dfsdf")
         pygame.draw.line(surface, (182, 149, 192), (self.Point1.x, self.Point1.y), (self.Point2.x, self.Point2.y), 1)
-    
+
     def __str__(self):
         return "[ {}, {}]".format(self.Point1.x, self.Point1.y)
 
@@ -98,10 +98,14 @@ class Line:
 
     
     def cambioX (self):
+        if (self.Point1.distance(self.Point2)) == 0:
+            return 0
         xC=(self.Point2.x-self.Point1.x)/(self.Point1.distance(self.Point2))
         return xC
 
     def cambioY (self):
+        if (self.Point1.distance(self.Point2)) == 0:
+            return 0
         yC=(self.Point2.y-self.Point1.y)/(self.Point1.distance(self.Point2))
         return yC
 
