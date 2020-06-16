@@ -55,7 +55,6 @@ class PathTracing:
                 point = Point(ray.Point2.x + math.cos(math.radians(grados))*distance, ray.Point2.y + math.sin(math.radians(grados))*distance)
                 destiny = point
             else:
-                print("ehj")
                 grados = random.uniform(0,180)
                 point = Point(ray.Point2.x + math.cos(math.radians(grados))*distance, ray.Point2.y + math.sin(math.radians(grados))*distance)
 
@@ -68,16 +67,43 @@ class PathTracing:
 
 
 
-    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor): 
+    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,puntosPintados, totalDistance): 
 
         puntos = list(bresenham(int(source.x),int(source.y),int(point.x),int(point.y)))
         #print(puntos)
-        
+        distance = source.distance(point)
+
         for pixel in puntos:
+
+            destiny = Point(pixel[0],pixel[1])
+            distance = source.distance(destiny) + totalDistance
+            intesity = (1-(distance/intence))**2
+
             if(pixel[0]>=0 and pixel[0]<500 and pixel[1]>=0 and pixel[1]<500):
-                px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intence
-                if reflejo:
-                    px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intence
+
+                if not reflejo:
+                    if not puntosPintados[int(pixel[0])][int(pixel[1])]:
+                        px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                        puntosPintados[int(pixel[0])][int(pixel[1])] = True
+                    else:
+                        intesity += px[int(pixel[0])][int(pixel[1])][0]/ref[int(pixel[0])][int(pixel[1])][0]
+                        if(intesity > 1):
+                            intesity = 1
+                        px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                        
+                else:
+                    if not puntosPintados[int(pixel[0])][int(pixel[1])]:
+                        px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                        puntosPintados[int(pixel[0])][int(pixel[1])] = True
+                    else:
+                        intesity += px[int(pixel[0])][int(pixel[1])][0]/ref[int(pixel[0])][int(pixel[1])][0]
+                        if(intesity > 1):
+                            intesity = 1
+                        px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                
+
+
+
 
 
     def get_color(colorRGBA1, colorRGBA2):
@@ -88,15 +114,20 @@ class PathTracing:
 
     def iluminar(self,sources,px,boundarys,surface,gMin, gMax, ref):
         #Solo funciona con una fuente de Luz
-        
-        for i in range (1):
+ 
+        puntosPintados = []
+        for k in range(500):
+            fila = []
+            for l in range(500):
+                fila += [False]
+            puntosPintados += [fila]        
+        for source in sources:
             
-            for j in range(gMin,gMax*4):
+            for j in range(gMin,gMax*10):
 
-                for source in sources:
+                for i in range (1):
 
-                    point = Point(source.Fuente.x + math.cos(math.radians(j/4
-                    ))*500, source.Fuente.y + math.sin(math.radians(j/4))*500)
+                    point = Point(source.Fuente.x + math.cos(math.radians(j/10))*500, source.Fuente.y + math.sin(math.radians(j/10))*500)
                     
 
                     if(point.x<0):
@@ -120,12 +151,13 @@ class PathTracing:
                     point.y = (point.y)
                     ray = Line(source.Fuente.x,source.Fuente.y,point.x,point.y)
                     distance = source.Fuente.distance(point)
-                    self.PathTracing(boundarys,ray,surface,px,distance,False,ref,source.color)
+
+                    self.PathTracing(boundarys,ray,surface,px,distance,False,ref,source.color,puntosPintados,0) #distancia total en cero
                     
 
 
 
-    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor):
+    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,puntosPintados, totalDistance):
         #print(sourceColor)
 
         dx = ray.cambioX()
@@ -133,7 +165,7 @@ class PathTracing:
         Interseco = False
         pInterseccion = ray.Point2
         #No elige el Boundary mas cercano 
-
+        tempTotalDistance = ray.distance()
         for boundary in boundarys:
 
             if boundary.line.isInstersect(ray):
@@ -154,9 +186,9 @@ class PathTracing:
             distance = distance-ray.distance()
             pointFinal = self.getReflectionVector(ray,interBound,500,500,distance)
             rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
-            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,ref[int(pInterseccion.x)][int(pInterseccion.y)][:3])
-
-        self.pintarRayo(ray.Point1, ray.Point2, surface, px,1,reflejo,ref,sourceColor)
+            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,ref[int(pInterseccion.x)][int(pInterseccion.y)][:3],puntosPintados,ray.distance()+totalDistance)
+                                                           #entre más grande más iluminado, le damos 1000         
+        self.pintarRayo(ray.Point1, ray.Point2, surface, px,400,reflejo,ref,sourceColor,puntosPintados,totalDistance)
 
 
 
@@ -193,9 +225,10 @@ class PathTracing:
 
         
 
-        sources = [FuenteDeLuz(220, 200, (255,255,0)),FuenteDeLuz(100, 300, (0,255,255))]
+        sources = [FuenteDeLuz(100, 300, (0,255,255)),FuenteDeLuz(350, 50, (0,255,255))]
         #boundarys = [Line(200,400,450,400),Line(200,100,450,100),Line(200,100,200,400),Line(400,100,400,400)]
-        boundarys = [Borde(200,99,200,401,False),Borde(400,99,400,401,False),Borde(0,100,401,100,False),Borde(0,400,401,400,False)]
+        #boundarys = [Borde(200,99,200,401,False),Borde(400,99,400,401,False),Borde(0,100,401,100,False),Borde(0,400,401,400,False)]
+        boundarys = [Borde(200,200,400,200,False), Borde(200,400,400,400,False), Borde(200,200,200,400,False), Borde(400,200,400,400,False)]
 
 
         first= True
