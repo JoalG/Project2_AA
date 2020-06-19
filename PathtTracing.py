@@ -67,7 +67,7 @@ class PathTracing:
 
 
 
-    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,intensidades, totalDistance, colores): 
+    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados): 
 
         puntos = list(bresenham(int(source.x),int(source.y),int(point.x),int(point.y)))
         #print(puntos)
@@ -83,27 +83,33 @@ class PathTracing:
 
                 if not reflejo:
                     
-                    intesity += intensidades[int(pixel[0])][int(pixel[1])]
-                    if(intesity > 1):
-                        intesity = 1                       
+                    if not puntosPintados[int(pixel[0])][int(pixel[1])]:
 
-                    if intensidades[int(pixel[0])][int(pixel[1])] == 0:
-                        px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                        px[int(pixel[0])][int(pixel[1])][0] *= sourceColor[0]
-                        px[int(pixel[0])][int(pixel[1])][1] *= sourceColor[1]
-                        px[int(pixel[0])][int(pixel[1])][2] *= sourceColor[2]
-                        colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0]*255,sourceColor[1]*255,sourceColor[2]*255]
-                    else:
+                        intesity += intensidades[int(pixel[0])][int(pixel[1])]
+                        if(intesity > 1):
+                            intesity = 1
 
-                        combinedColors = self.get_color(colores[int(pixel[0])][int(pixel[1])],[sourceColor[0]*255,sourceColor[1]*255,sourceColor[2]*255])
-                        colores[int(pixel[0])][int(pixel[1])] = combinedColors
+                        if colores[int(pixel[0])][int(pixel[1])] == [0,0,0]:                      
+                            px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                            px[int(pixel[0])][int(pixel[1])][0] *= (sourceColor[0]/255)
+                            px[int(pixel[0])][int(pixel[1])][1] *= (sourceColor[1]/255)
+                            px[int(pixel[0])][int(pixel[1])][2] *= (sourceColor[2]/255)
+                            colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0],sourceColor[1],sourceColor[2]]
+                        else:
+                            combinedColors = self.get_color(colores[int(pixel[0])][int(pixel[1])], sourceColor)
+                            colores[int(pixel[0])][int(pixel[1])] = combinedColors
 
-                        px[int(pixel[0])][int(pixel[1])] = ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                        px[int(pixel[0])][int(pixel[1])][0] *= (combinedColors[0]/255)
-                        px[int(pixel[0])][int(pixel[1])][1] *= (combinedColors[1]/225)
-                        px[int(pixel[0])][int(pixel[1])][2] *= (combinedColors[2]/255)
+                            r = combinedColors[0]/255
+                            g = combinedColors[1]/255
+                            b = combinedColors[2]/255
 
-                    intensidades[int(pixel[0])][int(pixel[1])] = intesity        
+                            px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                            px[int(pixel[0])][int(pixel[1])][0] *= r
+                            px[int(pixel[0])][int(pixel[1])][1] *= g
+                            px[int(pixel[0])][int(pixel[1])][2] *= b
+
+                        puntosPintados[int(pixel[0])][int(pixel[1])] = True
+                        intensidades[int(pixel[0])][int(pixel[1])] = intesity        
             
                 else:
                     intesity += intensidades[int(pixel[0])][int(pixel[1])]
@@ -111,10 +117,10 @@ class PathTracing:
                         intesity = 1
                     if intensidades[int(pixel[0])][int(pixel[1])] == 0:
                         px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                        px[int(pixel[0])][int(pixel[1])][0] *= sourceColor[0]
-                        px[int(pixel[0])][int(pixel[1])][1] *= sourceColor[1]
-                        px[int(pixel[0])][int(pixel[1])][2] *= sourceColor[2]
-                        colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0]*255,sourceColor[1]*255,sourceColor[2]*255]                                            
+                        px[int(pixel[0])][int(pixel[1])][0] *= (sourceColor[0]/255)
+                        px[int(pixel[0])][int(pixel[1])][1] *= (sourceColor[1]/255)
+                        px[int(pixel[0])][int(pixel[1])][2] *= (sourceColor[2]/255)
+                        colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0],sourceColor[1],sourceColor[2]]                                      
                     intensidades[int(pixel[0])][int(pixel[1])] = intesity
           
 
@@ -145,13 +151,16 @@ class PathTracing:
             intensidades += [fila]
             colores += [filaColores]        
         for source in sources:
-            sourceColor = list(source.color)
+        
+            puntosPintados = []
+            for k in range(500):
+                fila = []
+                for l in range(500):
+                    fila += [False]
+                puntosPintados += [fila]
 
-            sourceColor[0] = sourceColor[0]/255
-            sourceColor[1] = sourceColor[1]/255
-            sourceColor[2] = sourceColor[2]/255
-            print(sourceColor)
-            print()
+            sourceColor = list(source.color)
+        
             for j in range(gMin,gMax*10):
 
                 for i in range (1):
@@ -181,12 +190,12 @@ class PathTracing:
                     ray = Line(source.Fuente.x,source.Fuente.y,point.x,point.y)
                     distance = source.Fuente.distance(point)
 
-                    self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores) #distancia total en cero
+                    self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados) #distancia total en cero
                     
 
 
 
-    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores):
+    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados):
         #print(sourceColor)
 
         dx = ray.cambioX()
@@ -215,9 +224,9 @@ class PathTracing:
             distance = distance-ray.distance()
             pointFinal = self.getReflectionVector(ray,interBound,500,500,distance)
             rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
-            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,sourceColor,intensidades,ray.distance()+totalDistance, colores)
+            #self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,sourceColor,intensidades,ray.distance()+totalDistance, colores, puntosPintados)
                                                            #entre más grande más iluminado, le damos 1000         
-        self.pintarRayo(ray.Point1, ray.Point2, surface, px,500,reflejo,ref,sourceColor,intensidades,totalDistance, colores)
+        self.pintarRayo(ray.Point1, ray.Point2, surface, px,600,reflejo,ref,sourceColor,intensidades,totalDistance, colores, puntosPintados)
 
 
 
@@ -254,7 +263,7 @@ class PathTracing:
 
         
 
-        sources = [FuenteDeLuz(100, 300, (255,0,0)),FuenteDeLuz(350, 50, (0,0,255)),FuenteDeLuz(50, 50, (0,255,0))]
+        sources = [FuenteDeLuz(50, 50, (255,255,255)),FuenteDeLuz(100, 50, (255,0,0))]
         #boundarys = [Line(200,400,450,400),Line(200,100,450,100),Line(200,100,200,400),Line(400,100,400,400)]
         #boundarys = [Borde(200,99,200,401,False),Borde(400,99,400,401,False),Borde(0,100,401,100,False),Borde(0,400,401,400,False)]
         boundarys = [Borde(200,200,400,200,False), Borde(200,400,400,400,False), Borde(200,200,200,400,False), Borde(400,200,400,400,False)]
