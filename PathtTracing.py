@@ -63,11 +63,18 @@ class PathTracing:
         destiny.x = (destiny.x)
         destiny.y = (destiny.y)        
         return destiny
+
+    def getReflectionVectorEspejo(self, ray, boundary, dx, dy,distance):
+
+        if boundary.line.Point1.x == boundary.line.Point2.x:
+            return self.reboteVertical(ray.Point2, dx, dy, distance)
+        
+        else:
+            return self.reboteHorizontal(ray.Point2, dx, dy, distance)
         
 
 
-
-    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados): 
+    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote): 
 
         puntos = list(bresenham(int(source.x),int(source.y),int(point.x),int(point.y)))
         #print(puntos)
@@ -77,14 +84,13 @@ class PathTracing:
 
             destiny = Point(pixel[0],pixel[1])
             distance = source.distance(destiny) + totalDistance
-            intesity = (1-(distance/intence))**2
 
+            intesity = (1-(distance/intence))**2
             if(pixel[0]>=0 and pixel[0]<500 and pixel[1]>=0 and pixel[1]<500):
 
                 if not reflejo:
                     
-                    if not puntosPintados[int(pixel[0])][int(pixel[1])]:
-
+                    if not puntosPintados[int(pixel[0])][int(pixel[1])][0]:
                         intesity += intensidades[int(pixel[0])][int(pixel[1])]
                         if(intesity > 1):
                             intesity = 1
@@ -108,20 +114,43 @@ class PathTracing:
                             px[int(pixel[0])][int(pixel[1])][1] *= g
                             px[int(pixel[0])][int(pixel[1])][2] *= b
 
-                        puntosPintados[int(pixel[0])][int(pixel[1])] = True
+                        puntosPintados[int(pixel[0])][int(pixel[1])][0] = True
                         intensidades[int(pixel[0])][int(pixel[1])] = intesity        
             
                 else:
-                    intesity += intensidades[int(pixel[0])][int(pixel[1])]
-                    if(intesity > 1):
-                        intesity = 1
-                    if intensidades[int(pixel[0])][int(pixel[1])] == 0:
-                        px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                        px[int(pixel[0])][int(pixel[1])][0] *= (sourceColor[0]/255)
-                        px[int(pixel[0])][int(pixel[1])][1] *= (sourceColor[1]/255)
-                        px[int(pixel[0])][int(pixel[1])][2] *= (sourceColor[2]/255)
-                        colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0],sourceColor[1],sourceColor[2]]                                      
-                    intensidades[int(pixel[0])][int(pixel[1])] = intesity
+                    if numRebote <= 3:
+                        if not puntosPintados[int(pixel[0])][int(pixel[1])][numRebote]:
+                            intesity += intensidades[int(pixel[0])][int(pixel[1])]
+                            if intesity > 1:
+                                intesity = 1
+
+                            if colores[int(pixel[0])][int(pixel[1])] == [0,0,0]:                      
+                                px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                                px[int(pixel[0])][int(pixel[1])][0] *= (sourceColor[0]/255)
+                                px[int(pixel[0])][int(pixel[1])][1] *= (sourceColor[1]/255)
+                                px[int(pixel[0])][int(pixel[1])][2] *= (sourceColor[2]/255)
+                                colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0],sourceColor[1],sourceColor[2]]
+                            else:
+                                
+                                combinedColors = self.get_color(colores[int(pixel[0])][int(pixel[1])], sourceColor)
+                                colores[int(pixel[0])][int(pixel[1])] = combinedColors
+
+                                r = combinedColors[0]/255
+                                g = combinedColors[1]/255
+                                b = combinedColors[2]/255
+
+                                px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
+                                px[int(pixel[0])][int(pixel[1])][0] *= r
+                                px[int(pixel[0])][int(pixel[1])][1] *= g
+                                px[int(pixel[0])][int(pixel[1])][2] *= b
+                            
+                            if not puntosPintados[int(pixel[0])][int(pixel[1])][1]:
+                                puntosPintados[int(pixel[0])][int(pixel[1])][1] = True
+                            elif not puntosPintados[int(pixel[0])][int(pixel[1])][2]:
+                                puntosPintados[int(pixel[0])][int(pixel[1])][2] = True
+                            else:
+                                puntosPintados[int(pixel[0])][int(pixel[1])][3] = True
+                            intensidades[int(pixel[0])][int(pixel[1])] = intesity
           
 
                 
@@ -135,7 +164,8 @@ class PathTracing:
 
     def iluminar(self,sources,px,boundarys,surface,gMin, gMax, ref):
         #Solo funciona con una fuente de Luz
- 
+
+        maxLightDistance = math.sqrt((500*2)+(500**2))
         intensidades = []
         colores = []
         for k in range(500):
@@ -156,7 +186,12 @@ class PathTracing:
             for k in range(500):
                 fila = []
                 for l in range(500):
-                    fila += [False]
+                    inside = []
+                    inside += [False]
+                    inside += [False]
+                    inside += [False]
+                    inside += [False]
+                    fila += [inside]
                 puntosPintados += [fila]
 
             sourceColor = list(source.color)
@@ -195,8 +230,7 @@ class PathTracing:
 
 
 
-    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados):
-        #print(sourceColor)
+    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote = 0): 
 
         dx = ray.cambioX()
         dy = ray.cambioY()
@@ -222,11 +256,17 @@ class PathTracing:
         if(Interseco):
             ray.Point2 = pInterseccion
             distance = distance-ray.distance()
-            pointFinal = self.getReflectionVector(ray,interBound,500,500,distance)
+
+            if interBound.especularidad:
+                pointFinal = self.getReflectionVectorEspejo(ray, interBound, dx, dy, distance)
+            else:
+                pointFinal = self.getReflectionVector(ray,interBound,500,500,distance)
+                sourceColor = self.get_color(ref[int(pInterseccion.x)][int(pInterseccion.y)], sourceColor)
+
             rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
-            #self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,sourceColor,intensidades,ray.distance()+totalDistance, colores, puntosPintados)
+            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,sourceColor,intensidades,ray.distance()+totalDistance, colores, puntosPintados, numRebote+1)
                                                            #entre más grande más iluminado, le damos 1000         
-        self.pintarRayo(ray.Point1, ray.Point2, surface, px,600,reflejo,ref,sourceColor,intensidades,totalDistance, colores, puntosPintados)
+        self.pintarRayo(ray.Point1, ray.Point2, surface, px,707,reflejo,ref,sourceColor,intensidades,totalDistance, colores, puntosPintados, numRebote)
 
 
 
@@ -263,10 +303,27 @@ class PathTracing:
 
         
 
-        sources = [FuenteDeLuz(50, 50, (255,255,255)),FuenteDeLuz(100, 50, (255,0,0))]
-        #boundarys = [Line(200,400,450,400),Line(200,100,450,100),Line(200,100,200,400),Line(400,100,400,400)]
+        #sources = [FuenteDeLuz(50, 50, (255,255,255)),FuenteDeLuz(100, 50, (255,255,255))]
+        sources = [FuenteDeLuz(373, 224, (150,0,0)),FuenteDeLuz(220, 448, (0,0,150)),FuenteDeLuz(128, 133, (255,255,255))]        
+        # boundarys = [Line(200,400,450,400),Line(200,100,450,100),Line(200,100,200,400),Line(400,100,400,400)]
         #boundarys = [Borde(200,99,200,401,False),Borde(400,99,400,401,False),Borde(0,100,401,100,False),Borde(0,400,401,400,False)]
-        boundarys = [Borde(200,200,400,200,False), Borde(200,400,400,400,False), Borde(200,200,200,400,False), Borde(400,200,400,400,False)]
+        #boundarys = [Borde(200,200,400,200,False), Borde(200,400,400,400,False), Borde(200,200,200,400,False), Borde(400,200,400,400,False)]
+
+        boundarys = [Borde(303, 146, 325, 146, True),
+                    Borde(14, 23, 173, 23, True), 
+                    Borde(14, 23, 14, 256, True), 
+                    Borde(14, 256, 77, 256, True), 
+                    Borde(77, 256, 77,483, True),  
+                    Borde(77,483, 362, 483, True), 
+                    Borde(362, 333, 362, 483, True), 
+                    Borde(362, 333, 488, 333, True), 
+                    Borde(488, 23, 488, 333, True), 
+                    Borde(267, 23, 488, 23, True), 
+                    Borde(267, 23, 267, 248, True), 
+                    Borde(267, 248, 267, 369, True),
+                    Borde(173, 248, 173,369 , True),
+                    Borde(173, 23, 173, 248, True), 
+                    Borde(173, 248, 267, 248, True)]
 
 
         first= True
