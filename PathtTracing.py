@@ -88,69 +88,72 @@ class PathTracing:
             intesity = (1-(distance/intence))**2
             if(pixel[0]>=0 and pixel[0]<500 and pixel[1]>=0 and pixel[1]<500):
 
+                pixelPosX = int(pixel[0])
+                pixelPosY = int(pixel[1])
+
                 if not reflejo:
                     
-                    if not puntosPintados[int(pixel[0])][int(pixel[1])][0]:
-                        intesity += intensidades[int(pixel[0])][int(pixel[1])]
+                    if not puntosPintados[pixelPosX][pixelPosY][0]:
+                        intesity += intensidades[pixelPosX][pixelPosY]
                         if(intesity > 1):
                             intesity = 1
 
-                        if colores[int(pixel[0])][int(pixel[1])] == [0,0,0]:                      
-                            px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                            px[int(pixel[0])][int(pixel[1])][0] *= (sourceColor[0]/255)
-                            px[int(pixel[0])][int(pixel[1])][1] *= (sourceColor[1]/255)
-                            px[int(pixel[0])][int(pixel[1])][2] *= (sourceColor[2]/255)
-                            colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0],sourceColor[1],sourceColor[2]]
+                        if colores[pixelPosX][pixelPosY] == [0,0,0]:                      
+                            px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
+                            px[pixelPosX][pixelPosY][0] *= (sourceColor[0]/255)
+                            px[pixelPosX][pixelPosY][1] *= (sourceColor[1]/255)
+                            px[pixelPosX][pixelPosY][2] *= (sourceColor[2]/255)
+                            colores[pixelPosX][pixelPosY] = [sourceColor[0],sourceColor[1],sourceColor[2]]
                         else:
-                            combinedColors = self.get_color(colores[int(pixel[0])][int(pixel[1])], sourceColor)
-                            colores[int(pixel[0])][int(pixel[1])] = combinedColors
+                            combinedColors = self.get_color(colores[pixelPosX][pixelPosY], sourceColor)
+                            colores[pixelPosX][pixelPosY] = combinedColors
 
                             r = combinedColors[0]/255
                             g = combinedColors[1]/255
                             b = combinedColors[2]/255
 
-                            px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                            px[int(pixel[0])][int(pixel[1])][0] *= r
-                            px[int(pixel[0])][int(pixel[1])][1] *= g
-                            px[int(pixel[0])][int(pixel[1])][2] *= b
+                            px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
+                            px[pixelPosX][pixelPosY][0] *= r
+                            px[pixelPosX][pixelPosY][1] *= g
+                            px[pixelPosX][pixelPosY][2] *= b
 
-                        puntosPintados[int(pixel[0])][int(pixel[1])][0] = True
-                        intensidades[int(pixel[0])][int(pixel[1])] = intesity        
+                        puntosPintados[pixelPosX][pixelPosY][0] = True
+                        intensidades[pixelPosX][pixelPosY] = intesity        
             
                 else:
                     if numRebote <= 3:
-                        if not puntosPintados[int(pixel[0])][int(pixel[1])][numRebote]:
-                            intesity += intensidades[int(pixel[0])][int(pixel[1])]
+                        if not puntosPintados[pixelPosX][pixelPosY][numRebote]:
+                            intesity += intensidades[pixelPosX][pixelPosY]
                             if intesity > 1:
                                 intesity = 1
 
-                            if colores[int(pixel[0])][int(pixel[1])] == [0,0,0]:                      
-                                px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                                px[int(pixel[0])][int(pixel[1])][0] *= (sourceColor[0]/255)
-                                px[int(pixel[0])][int(pixel[1])][1] *= (sourceColor[1]/255)
-                                px[int(pixel[0])][int(pixel[1])][2] *= (sourceColor[2]/255)
-                                colores[int(pixel[0])][int(pixel[1])] = [sourceColor[0],sourceColor[1],sourceColor[2]]
+                            if colores[pixelPosX][pixelPosY] == [0,0,0]:                      
+                                px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
+                                px[pixelPosX][pixelPosY][0] *= (sourceColor[0]/255)
+                                px[pixelPosX][pixelPosY][1] *= (sourceColor[1]/255)
+                                px[pixelPosX][pixelPosY][2] *= (sourceColor[2]/255)
+                                colores[pixelPosX][pixelPosY] = [sourceColor[0],sourceColor[1],sourceColor[2]]
                             else:
                                 
-                                combinedColors = self.get_color(colores[int(pixel[0])][int(pixel[1])], sourceColor)
-                                colores[int(pixel[0])][int(pixel[1])] = combinedColors
+                                combinedColors = self.get_color(colores[pixelPosX][pixelPosY], sourceColor)
+                                colores[pixelPosX][pixelPosY] = combinedColors
 
                                 r = combinedColors[0]/255
                                 g = combinedColors[1]/255
                                 b = combinedColors[2]/255
 
-                                px[int(pixel[0])][int(pixel[1])]=ref[int(pixel[0])][int(pixel[1])][:3]*intesity
-                                px[int(pixel[0])][int(pixel[1])][0] *= r
-                                px[int(pixel[0])][int(pixel[1])][1] *= g
-                                px[int(pixel[0])][int(pixel[1])][2] *= b
+                                px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
+                                px[pixelPosX][pixelPosY][0] *= r
+                                px[pixelPosX][pixelPosY][1] *= g
+                                px[pixelPosX][pixelPosY][2] *= b
                             
-                            if not puntosPintados[int(pixel[0])][int(pixel[1])][1]:
-                                puntosPintados[int(pixel[0])][int(pixel[1])][1] = True
-                            elif not puntosPintados[int(pixel[0])][int(pixel[1])][2]:
-                                puntosPintados[int(pixel[0])][int(pixel[1])][2] = True
+                            if not puntosPintados[pixelPosX][pixelPosY][1]:
+                                puntosPintados[pixelPosX][pixelPosY][1] = True
+                            elif not puntosPintados[pixelPosX][pixelPosY][2]:
+                                puntosPintados[pixelPosX][pixelPosY][2] = True
                             else:
-                                puntosPintados[int(pixel[0])][int(pixel[1])][3] = True
-                            intensidades[int(pixel[0])][int(pixel[1])] = intesity
+                                puntosPintados[pixelPosX][pixelPosY][3] = True
+                            intensidades[pixelPosX][pixelPosY] = intesity
           
 
                 
