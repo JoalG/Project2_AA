@@ -257,14 +257,16 @@ class PathTracing:
             ray.Point2 = pInterseccion
             distance = distance-ray.distance()
 
+            colorBleeding = [sourceColor[0], sourceColor[1], sourceColor[2]]
+
             if interBound.especularidad:
                 pointFinal = self.getReflectionVectorEspejo(ray, interBound, dx, dy, distance)
             else:
                 pointFinal = self.getReflectionVector(ray,interBound,500,500,distance)
-                sourceColor = self.get_color(ref[int(pInterseccion.x)][int(pInterseccion.y)], sourceColor)
+                colorBleeding = self.get_color(ref[int(pInterseccion.x)][int(pInterseccion.y)], sourceColor)
 
             rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
-            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,sourceColor,intensidades,ray.distance()+totalDistance, colores, puntosPintados, numRebote+1)
+            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,colorBleeding,intensidades,ray.distance()+totalDistance, colores, puntosPintados, numRebote+1)
                                                            #entre más grande más iluminado, le damos 1000         
         self.pintarRayo(ray.Point1, ray.Point2, surface, px,707,reflejo,ref,sourceColor,intensidades,totalDistance, colores, puntosPintados, numRebote)
 
@@ -285,7 +287,7 @@ class PathTracing:
         pygame.display.set_caption("2D Raytracing")
         done = False
         clock = pygame.time.Clock()
-        im_file = Image.open("fondo.png")
+        im_file = Image.open("fondoMazmorraVerde.png")
         ref = np.array(im_file)
         ref2 = np.array(im_file)
          
@@ -304,11 +306,11 @@ class PathTracing:
         
 
         #sources = [FuenteDeLuz(50, 50, (255,255,255)),FuenteDeLuz(100, 50, (255,255,255))]
-        sources = [FuenteDeLuz(373, 224, (150,0,0)),FuenteDeLuz(220, 448, (0,0,150)),FuenteDeLuz(128, 133, (255,255,255))]        
+        #sources = [FuenteDeLuz(373, 224, (150,0,0)),FuenteDeLuz(220, 448, (0,0,150)),FuenteDeLuz(128, 133, (255,255,255))]        
         # boundarys = [Line(200,400,450,400),Line(200,100,450,100),Line(200,100,200,400),Line(400,100,400,400)]
         #boundarys = [Borde(200,99,200,401,False),Borde(400,99,400,401,False),Borde(0,100,401,100,False),Borde(0,400,401,400,False)]
         #boundarys = [Borde(200,200,400,200,False), Borde(200,400,400,400,False), Borde(200,200,200,400,False), Borde(400,200,400,400,False)]
-
+        '''
         boundarys = [Borde(303, 146, 325, 146, True),
                     Borde(14, 23, 173, 23, True), 
                     Borde(14, 23, 14, 256, True), 
@@ -324,6 +326,43 @@ class PathTracing:
                     Borde(173, 248, 173,369 , True),
                     Borde(173, 23, 173, 248, True), 
                     Borde(173, 248, 267, 248, True)]
+        '''
+
+        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(161, 358, (210,150,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (230,230,50))]
+        #sources = [FuenteDeLuz(86, 358, (255,255,255)),FuenteDeLuz(161, 358, (255,255,255)),FuenteDeLuz(411, 226, (255,255,255)),FuenteDeLuz(362, 33, (255,255,255))]
+
+        boundarys = [Borde(69, 325, 69, 500, False),
+                    Borde(69, 325, 94, 325, False),
+                    Borde(94, 325, 94, 58, False),
+                    Borde(94, 58, 219, 58, False),
+                    Borde(219, 58, 219, 25, False),
+                    Borde(219, 25, 319, 25, False),
+                    Borde(319, 25, 319, 0, False),
+                    Borde(405, 0, 405, 25, False),
+                    Borde(405, 25, 499, 25, False),
+                    Borde(180, 500, 180, 325, False),
+                    Borde(180, 325, 156, 325, False),
+                    Borde(156, 325, 156, 241, False),
+                    Borde(156, 241, 219, 241, False),
+                    Borde(219, 241, 219, 474, False),
+                    Borde(219, 474, 499, 474, False),
+                    Borde(230, 307, 319, 307, False),
+                    Borde(319, 307, 319, 358, False),
+                    Borde(230, 307, 230, 358, False),
+                    Borde(230, 358, 319, 358, False),
+                    Borde(405, 307, 499, 307, False),
+                    Borde(405, 307, 405, 358, False),
+                    Borde(405, 358, 499, 358, False),
+                    Borde(280, 141, 319, 141, False),
+                    Borde(319, 141, 319, 192, False),
+                    Borde(280, 141, 280, 192, False),
+                    Borde(280, 192, 319, 192, False),
+                    Borde(405, 141, 444, 141, False),
+                    Borde(444, 141, 444, 192, False),
+                    Borde(405, 141, 405, 192, False),
+                    Borde(405, 192, 444, 192, False),
+                    Borde(121, 347, 145, 347, True)
+                    ]
 
 
         first= True
