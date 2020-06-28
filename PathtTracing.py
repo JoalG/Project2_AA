@@ -167,6 +167,7 @@ class PathTracing:
 
     def iluminar(self,sources,px,boundarys,surface,gMin, gMax, ref):
         #Solo funciona con una fuente de Luz
+        startTime = time.time()
 
         maxLightDistance = math.sqrt((500*2)+(500**2))
         intensidades = []
@@ -182,9 +183,11 @@ class PathTracing:
                 elemColores += [0]
                 filaColores += [elemColores]
             intensidades += [fila]
-            colores += [filaColores]        
-        for source in sources:
+            colores += [filaColores]   
         
+        puntosPintadosPorSource = []
+        for source in sources :
+            
             puntosPintados = []
             for k in range(500):
                 fila = []
@@ -197,40 +200,33 @@ class PathTracing:
                     fila += [inside]
                 puntosPintados += [fila]
 
-            sourceColor = list(source.color)
+            
+            puntosPintadosPorSource += [puntosPintados]
+             
         
-            for j in range(gMin,gMax*10):
+        for j in range(gMax*9):
+        
+            distancia = random.uniform(300,400)
+            direccion = random.uniform(0,360)
+            
+          
+            for k in range(len(sources)):
+                source = sources[k]
+                puntosPintados = puntosPintadosPorSource[k]
+                sourceColor = list(source.color)
+                point = Point(source.Fuente.x + math.cos(math.radians(direccion))*distancia, source.Fuente.y + math.sin(math.radians(direccion))*distancia)
+                
+    
+                        
+                point.x = (point.x)
+                point.y = (point.y)
+                ray = Line(source.Fuente.x,source.Fuente.y,point.x,point.y)
+                distance = source.Fuente.distance(point)
 
-                for i in range (1):
-
-                    point = Point(source.Fuente.x + math.cos(math.radians(j/10))*500, source.Fuente.y + math.sin(math.radians(j/10))*500)
+                self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados) #distancia total en cero
                     
-
-                    if(point.x<0):
-                        point.x = 0
-                    if(point.x>499):
-                        point.x = 499
-                    if(point.y<0):
-                        point.y = 0
-                    if(point.y>499):
-                        point.y =499 
-
-                    if(point.y == point.x):
-                        continue 
-                    if(point.y == 499 and point.x ==0)   :
-                        continue       
-                    if(point.x == 499 and point.y ==0)   :
-                        continue        
-                    
-                    
-                    point.x = (point.x)
-                    point.y = (point.y)
-                    ray = Line(source.Fuente.x,source.Fuente.y,point.x,point.y)
-                    distance = source.Fuente.distance(point)
-
-                    self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados) #distancia total en cero
-                    
-
+        print("TERMINO MAMAPICHAS")
+        print(time.time()-startTime)
 
 
     def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote = 0): 
@@ -291,6 +287,7 @@ class PathTracing:
         done = False
         clock = pygame.time.Clock()
         im_file = Image.open("fondoMazmorraVerde.png")
+        
         ref = np.array(im_file)
         ref2 = np.array(im_file)
          
@@ -298,15 +295,9 @@ class PathTracing:
             for j in range(500):
                 ref[i][j]=ref2[j][i]
 
-
-
-
         i = Image.new("RGB", (500, 500), (0, 0, 0) )
         ph = np.array(i)
         px = np.array(i)
-
-
-        
 
         #sources = [FuenteDeLuz(50, 50, (255,255,255)),FuenteDeLuz(100, 50, (255,255,255))]
         #sources = [FuenteDeLuz(373, 224, (150,0,0)),FuenteDeLuz(220, 448, (0,0,150)),FuenteDeLuz(128, 133, (255,255,255))]        
@@ -331,8 +322,8 @@ class PathTracing:
                     Borde(173, 248, 267, 248, True)]
         '''
 
-        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(161, 358, (210,150,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (230,230,50))]
-        #sources = [FuenteDeLuz(86, 358, (255,255,255)),FuenteDeLuz(161, 358, (255,255,255)),FuenteDeLuz(411, 226, (255,255,255)),FuenteDeLuz(362, 33, (255,255,255))]
+        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (230,230,50))]     #,FuenteDeLuz(161, 358, (210,150,20))
+        #sources = [FuenteDeLuz(86, 358, (255,255,255)),FuenteDeLuz(411, 226, (255,255,255)),FuenteDeLuz(362, 33, (255,255,255))] #,FuenteDeLuz(161, 358, (255,255,255))
 
         boundarys = [Borde(69, 325, 69, 500, False),
                     Borde(69, 325, 94, 325, False),
@@ -369,23 +360,23 @@ class PathTracing:
 
 
         first= True
-        while True:
+        done = False
+        
+        
+        while not done:
             #print("f")
             for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         done = True
+                        
 
             screen.fill((255, 255, 255))
             # Convert to a surface and splat onto screen offset by border width and height
             npimage=(px)
             surface = pygame.surfarray.make_surface(npimage)
             #b = Boundary(350,100,350,400)
-            for bound in boundarys:
-                bound.draw(surface)
-            
-
-            for source in sources:
-                source.draw(surface)
+       
+           
          
     
             if first:
@@ -395,10 +386,13 @@ class PathTracing:
                 first=False
 
 
+
                 
             screen.blit(surface, (border, border))
             pygame.display.flip()
-            clock.tick(60)
+        
+      
+        
 
 p = PathTracing()
 p.main()
