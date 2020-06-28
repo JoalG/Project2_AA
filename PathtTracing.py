@@ -86,6 +86,7 @@ class PathTracing:
             distance = source.distance(destiny) + totalDistance
 
             intesity = (1-(distance/intence))**2
+
             if(pixel[0]>=0 and pixel[0]<500 and pixel[1]>=0 and pixel[1]<500):
 
                 pixelPosX = int(pixel[0])
@@ -93,29 +94,12 @@ class PathTracing:
 
                 if not reflejo:
                     
-                    if not puntosPintados[pixelPosX][pixelPosY][0]:
-                        intesity += intensidades[pixelPosX][pixelPosY]
-                        if(intesity > 1):
-                            intesity = 1
-
-                        if colores[pixelPosX][pixelPosY] == [0,0,0]:                      
-                            px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
-                            px[pixelPosX][pixelPosY][0] *= (sourceColor[0]/255)
-                            px[pixelPosX][pixelPosY][1] *= (sourceColor[1]/255)
-                            px[pixelPosX][pixelPosY][2] *= (sourceColor[2]/255)
-                            colores[pixelPosX][pixelPosY] = [sourceColor[0],sourceColor[1],sourceColor[2]]
+                    if not puntosPintados[pixelPosX][pixelPosY][0]:                                            
+                        intesity = self.getLimitedIntensity(intensidades, intesity, 1, pixelPosX, pixelPosY)
+                        if colores[pixelPosX][pixelPosY] == [0,0,0]:
+                            self.pintarPuntoPrimeraVez(px, ref, colores, sourceColor, pixelPosX, pixelPosY, intesity)
                         else:
-                            combinedColors = self.get_color(colores[pixelPosX][pixelPosY], sourceColor)
-                            colores[pixelPosX][pixelPosY] = combinedColors
-
-                            r = combinedColors[0]/255
-                            g = combinedColors[1]/255
-                            b = combinedColors[2]/255
-
-                            px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
-                            px[pixelPosX][pixelPosY][0] *= r
-                            px[pixelPosX][pixelPosY][1] *= g
-                            px[pixelPosX][pixelPosY][2] *= b
+                            self.pintarPuntoRecurente(px, ref, colores, sourceColor, pixelPosX, pixelPosY, intesity)
 
                         puntosPintados[pixelPosX][pixelPosY][0] = True
                         intensidades[pixelPosX][pixelPosY] = intesity        
@@ -123,29 +107,13 @@ class PathTracing:
                 else:
                     if numRebote <= 3:
                         if not puntosPintados[pixelPosX][pixelPosY][numRebote]:
-                            intesity += intensidades[pixelPosX][pixelPosY]
-                            if intesity > 1:
-                                intesity = 1
+                        
+                            intesity = self.getLimitedIntensity(intensidades, intesity, 1, pixelPosX, pixelPosY)
 
                             if colores[pixelPosX][pixelPosY] == [0,0,0]:                      
-                                px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
-                                px[pixelPosX][pixelPosY][0] *= (sourceColor[0]/255)
-                                px[pixelPosX][pixelPosY][1] *= (sourceColor[1]/255)
-                                px[pixelPosX][pixelPosY][2] *= (sourceColor[2]/255)
-                                colores[pixelPosX][pixelPosY] = [sourceColor[0],sourceColor[1],sourceColor[2]]
+                                self.pintarPuntoPrimeraVez(px, ref, colores, sourceColor, pixelPosX, pixelPosY, intesity)
                             else:
-                                
-                                combinedColors = self.get_color(colores[pixelPosX][pixelPosY], sourceColor)
-                                colores[pixelPosX][pixelPosY] = combinedColors
-
-                                r = combinedColors[0]/255
-                                g = combinedColors[1]/255
-                                b = combinedColors[2]/255
-
-                                px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
-                                px[pixelPosX][pixelPosY][0] *= r
-                                px[pixelPosX][pixelPosY][1] *= g
-                                px[pixelPosX][pixelPosY][2] *= b
+                                self.pintarPuntoRecurente(px, ref, colores, sourceColor, pixelPosX, pixelPosY, intesity)
                             
                             if not puntosPintados[pixelPosX][pixelPosY][1]:
                                 puntosPintados[pixelPosX][pixelPosY][1] = True
@@ -153,11 +121,34 @@ class PathTracing:
                                 puntosPintados[pixelPosX][pixelPosY][2] = True
                             else:
                                 puntosPintados[pixelPosX][pixelPosY][3] = True
+
                             intensidades[pixelPosX][pixelPosY] = intesity
-          
+         
+    def getLimitedIntensity(self, intensidades, intesity, maxIntesity, pixelPosX, pixelPosY):
+        intesity += intensidades[pixelPosX][pixelPosY]
+        if(intesity > maxIntesity):
+            intesity = maxIntesity
+        return intesity        
 
+    def pintarPunto(self, px, ref, color, pixelPosX, pixelPosY, intesity):
+        px[pixelPosX][pixelPosY]=ref[pixelPosX][pixelPosY][:3]*intesity
+        px[pixelPosX][pixelPosY][0] *= (color[0]/255)
+        px[pixelPosX][pixelPosY][1] *= (color[1]/255)
+        px[pixelPosX][pixelPosY][2] *= (color[2]/255)       
+
+    def pintarPuntoPrimeraVez(self, px, ref, colores, color, pixelPosX, pixelPosY, intesity):
+        self.pintarPunto(px, ref, color, pixelPosX, pixelPosY, intesity)
+        colores[pixelPosX][pixelPosY] = [color[0],color[1],color[2]]
                 
+    def pintarPuntoRecurente(self, px, ref, colores, color, pixelPosX, pixelPosY, intesity):
+        combinedColors = self.get_color(colores[pixelPosX][pixelPosY], color)
+        colores[pixelPosX][pixelPosY] = combinedColors
 
+        r = combinedColors[0]
+        g = combinedColors[1]
+        b = combinedColors[2]
+
+        self.pintarPunto(px, ref, [r, g, b], pixelPosX, pixelPosY, intesity)
 
     def get_color(self, colorRGBA1, colorRGBA2):
         red   = (colorRGBA1[0] + colorRGBA2[0]) / 2
@@ -325,6 +316,7 @@ class PathTracing:
         sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (230,230,50))]     #,FuenteDeLuz(161, 358, (210,150,20))
         #sources = [FuenteDeLuz(86, 358, (255,255,255)),FuenteDeLuz(411, 226, (255,255,255)),FuenteDeLuz(362, 33, (255,255,255))] #,FuenteDeLuz(161, 358, (255,255,255))
 
+        '''
         boundarys = [Borde(69, 325, 69, 500, False),
                     Borde(69, 325, 94, 325, False),
                     Borde(94, 325, 94, 58, False),
@@ -357,7 +349,38 @@ class PathTracing:
                     Borde(405, 192, 444, 192, False),
                     Borde(121, 347, 145, 347, True)
                     ]
-
+        '''
+        boundarys = [Borde(74, 499, 74, 332, False),
+                    Borde(74, 332, 100, 332, False),
+                    Borde(100, 332, 100, 66, False),
+                    Borde(100, 66, 224, 66, False),
+                    Borde(224, 66, 224, 32, False),
+                    Borde(224, 32, 324, 32, False),
+                    Borde(324, 32, 324, 0, False),
+                    Borde(399, 0, 399, 32, False),
+                    Borde(399, 32, 499, 32, False),
+                    Borde(175, 499, 175, 332, False),
+                    Borde(175, 332, 150, 332, False),
+                    Borde(150, 332, 150, 233, False),
+                    Borde(150, 233, 224, 233, False),
+                    Borde(224, 233, 224, 467, False),
+                    Borde(224, 467, 499, 467, False),
+                    Borde(224, 300, 324, 300, False),
+                    Borde(324, 300, 324, 366, False),
+                    Borde(324, 366, 224, 366, False),
+                    Borde(499, 300, 399, 300, False),
+                    Borde(399, 300, 399, 366, False),
+                    Borde(399, 366, 499, 366, False),
+                    Borde(275, 133, 324, 133, False),
+                    Borde(324, 133, 324, 199, False),
+                    Borde(275, 133, 275, 199, False),
+                    Borde(275, 199, 324, 199, False),
+                    Borde(399, 133, 450, 133, False),
+                    Borde(450, 133, 450, 199, False),
+                    Borde(399, 133, 399, 199, False),
+                    Borde(399, 199, 450, 199, False),
+                    Borde(100, 445, 150, 445, True)
+                    ]
 
         first= True
         done = False
@@ -376,8 +399,6 @@ class PathTracing:
             surface = pygame.surfarray.make_surface(npimage)
             #b = Boundary(350,100,350,400)
        
-           
-         
     
             if first:
                 t = threading.Thread(target = self.iluminar, args=(sources,px,boundarys,surface,0,360,ref) ) # f being the function that tells how the ball should move
