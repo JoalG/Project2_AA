@@ -74,7 +74,7 @@ class PathTracing:
         
 
 
-    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote): 
+    def pintarRayo(self, source, point, surface, px,intence,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote, espejo): 
 
         puntos = list(bresenham(int(source.x),int(source.y),int(point.x),int(point.y)))
         #print(puntos)
@@ -95,7 +95,7 @@ class PathTracing:
                 if not reflejo:
                     
                     if not puntosPintados[pixelPosX][pixelPosY][0]:                                            
-                        intesity = self.getLimitedIntensity(intensidades, intesity, 1, pixelPosX, pixelPosY)
+                        intesity = self.getLimitedIntensity(intensidades, intesity, max(intensidades[pixelPosX][pixelPosY], 0.8), pixelPosX, pixelPosY)
                         if colores[pixelPosX][pixelPosY] == [0,0,0]:
                             self.pintarPuntoPrimeraVez(px, ref, colores, sourceColor, pixelPosX, pixelPosY, intesity)
                         else:
@@ -105,11 +105,14 @@ class PathTracing:
                         intensidades[pixelPosX][pixelPosY] = intesity        
             
                 else:
+
+                    if not espejo:
+                        intesity = self.getLimitedIntensity(intensidades, intesity, max(intensidades[pixelPosX][pixelPosY], 0.8), pixelPosX, pixelPosY)
+                    else:
+                        intesity = 1
+
                     if numRebote <= 3:
                         if not puntosPintados[pixelPosX][pixelPosY][numRebote]:
-                        
-                            intesity = self.getLimitedIntensity(intensidades, intesity, 1, pixelPosX, pixelPosY)
-
                             if colores[pixelPosX][pixelPosY] == [0,0,0]:                      
                                 self.pintarPuntoPrimeraVez(px, ref, colores, sourceColor, pixelPosX, pixelPosY, intesity)
                             else:
@@ -121,8 +124,9 @@ class PathTracing:
                                 puntosPintados[pixelPosX][pixelPosY][2] = True
                             else:
                                 puntosPintados[pixelPosX][pixelPosY][3] = True
-
-                            intensidades[pixelPosX][pixelPosY] = intesity
+                        elif espejo:
+                            px[pixelPosX][pixelPosY]=px[pixelPosX][pixelPosY][:3]*intesity
+                        intensidades[pixelPosX][pixelPosY] = intesity
          
     def getLimitedIntensity(self, intensidades, intesity, maxIntesity, pixelPosX, pixelPosY):
         intesity += intensidades[pixelPosX][pixelPosY]
@@ -214,14 +218,13 @@ class PathTracing:
                 ray = Line(source.Fuente.x,source.Fuente.y,point.x,point.y)
                 distance = source.Fuente.distance(point)
 
-                self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados) #distancia total en cero
+                self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados,0) #distancia total en cero
                     
         print("TERMINO MAMAPICHAS")
         print(time.time()-startTime)
 
 
-    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote = 0): 
-
+    def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote, espejo = False): 
         dx = ray.cambioX()
         dy = ray.cambioY()
         Interseco = False
@@ -256,9 +259,10 @@ class PathTracing:
                 colorBleeding = self.get_color(ref[int(pInterseccion.x)][int(pInterseccion.y)], sourceColor)
 
             rayRebote = Line(pInterseccion.x,pInterseccion.y,pointFinal.x,pointFinal.y)
-            self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,colorBleeding,intensidades,ray.distance()+totalDistance, colores, puntosPintados, numRebote+1)
+            if numRebote < 3:
+                self.PathTracing(boundarys,rayRebote,surface,px,distance,True,ref,colorBleeding,intensidades,ray.distance()+totalDistance, colores, puntosPintados, numRebote+1, interBound.especularidad)
                                                            #entre más grande más iluminado, le damos 1000         
-        self.pintarRayo(ray.Point1, ray.Point2, surface, px,707,reflejo,ref,sourceColor,intensidades,totalDistance, colores, puntosPintados, numRebote)
+        self.pintarRayo(ray.Point1, ray.Point2, surface, px,707,reflejo,ref,sourceColor,intensidades,totalDistance, colores, puntosPintados, numRebote, espejo)
 
 
 
@@ -313,7 +317,7 @@ class PathTracing:
                     Borde(173, 248, 267, 248, True)]
         '''
 
-        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (230,230,50))]     #,FuenteDeLuz(161, 358, (210,150,20))
+        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255))]     #,FuenteDeLuz(161, 358, (210,150,20))
         #sources = [FuenteDeLuz(86, 358, (255,255,255)),FuenteDeLuz(411, 226, (255,255,255)),FuenteDeLuz(362, 33, (255,255,255))] #,FuenteDeLuz(161, 358, (255,255,255))
 
         '''
@@ -379,7 +383,7 @@ class PathTracing:
                     Borde(450, 133, 450, 199, False),
                     Borde(399, 133, 399, 199, False),
                     Borde(399, 199, 450, 199, False),
-                    Borde(100, 445, 150, 445, True)
+                    Borde(324, 32, 324, 133, True)
                     ]
 
         first= True
