@@ -218,7 +218,8 @@ class PathTracing:
                 ray = Line(source.Fuente.x,source.Fuente.y,point.x,point.y)
                 distance = source.Fuente.distance(point)
 
-                self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados,0) #distancia total en cero
+                if sourceColor != [0,0,0]:
+                    self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados,0) #distancia total en cero
                     
         print("Tiempo de ejecucion: ",time.time()-startTime)
         print("Finalizo")
@@ -297,7 +298,7 @@ class PathTracing:
         px = np.array(i)
 
         #sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255)), FuenteDeLuz(150, 150, (210,85,20)),  FuenteDeLuz(160, 160, (210,85,20)), FuenteDeLuz(440, 440, (255,255,255))]     #,FuenteDeLuz(161, 358, (210,150,20))
-        sources = [FuenteDeLuz(86, 358, (210,85,20),0),FuenteDeLuz(411, 226, (210,85,20),0),FuenteDeLuz(362, 33, (255,255,255),0)] 
+        sources = [FuenteDeLuz(86, 358, (210,85,20),0),FuenteDeLuz(411, 226, (210,85,20),0.3),FuenteDeLuz(362, 33, (255,255,255),1)] 
 
         boundarys = [Borde(74, 499, 74, 332, False),
                     Borde(74, 332, 100, 332, False),
