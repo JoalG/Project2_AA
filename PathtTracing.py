@@ -160,7 +160,7 @@ class PathTracing:
         blue  = (colorRGBA1[2] + colorRGBA2[2]) / 2
         return [int(red), int(green), int(blue)]
 
-    def iluminar(self,sources,px,boundarys,surface,gMin, gMax, ref):
+    def iluminar(self,sources,px,boundarys,surface,gMin, gMax, ref, recursos):
         #Solo funciona con una fuente de Luz
         startTime = time.time()
 
@@ -199,7 +199,7 @@ class PathTracing:
             puntosPintadosPorSource += [puntosPintados]
              
         
-        for j in range(gMax*9):
+        for j in range(recursos):
         
             distancia = random.uniform(300,400)
             direccion = random.uniform(0,360)
@@ -220,7 +220,8 @@ class PathTracing:
 
                 self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados,0) #distancia total en cero
                     
-        print(time.time()-startTime)
+        print("Tiempo de ejecucion: ",time.time()-startTime)
+        print("Finalizo")
 
 
     def PathTracing(self,boundarys,ray,surface,px,distance,reflejo,ref,sourceColor,intensidades, totalDistance, colores, puntosPintados, numRebote, espejo = False): 
@@ -273,6 +274,8 @@ class PathTracing:
     def main(self):
             
         #pygame stuff
+        print("Wellcome to 2D Path Tracing")
+        recursos = int(input("Ingrese la cantidad de recursos : "))
         h,w=550,550
         border=50
         pygame.init()
@@ -294,7 +297,7 @@ class PathTracing:
         px = np.array(i)
 
         #sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255)), FuenteDeLuz(150, 150, (210,85,20)),  FuenteDeLuz(160, 160, (210,85,20)), FuenteDeLuz(440, 440, (255,255,255))]     #,FuenteDeLuz(161, 358, (210,150,20))
-        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255))] 
+        sources = [FuenteDeLuz(86, 358, (210,85,20),0),FuenteDeLuz(411, 226, (210,85,20),0),FuenteDeLuz(362, 33, (255,255,255),0)] 
 
         boundarys = [Borde(74, 499, 74, 332, False),
                     Borde(74, 332, 100, 332, False),
@@ -332,6 +335,8 @@ class PathTracing:
         done = False
         
         
+
+        
         while not done:
             #print("f")
             for event in pygame.event.get():
@@ -346,7 +351,7 @@ class PathTracing:
             #b = Boundary(350,100,350,400)
     
             if first:
-                t = threading.Thread(target = self.iluminar, args=(sources,px,boundarys,surface,0,360,ref) ) # f being the function that tells how the ball should move
+                t = threading.Thread(target = self.iluminar, args=(sources,px,boundarys,surface,0,360,ref,recursos) ) # f being the function that tells how the ball should move
                 t.setDaemon(True) # Alternatively, you can use "t.daemon = True"
                 t.start()
                 first=False
