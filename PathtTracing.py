@@ -220,7 +220,6 @@ class PathTracing:
 
                 self.PathTracing(boundarys,ray,surface,px,distance,False,ref,sourceColor,intensidades,0,colores, puntosPintados,0) #distancia total en cero
                     
-        print("TERMINO MAMAPICHAS")
         print(time.time()-startTime)
 
 
@@ -294,66 +293,9 @@ class PathTracing:
         ph = np.array(i)
         px = np.array(i)
 
-        #sources = [FuenteDeLuz(50, 50, (255,255,255)),FuenteDeLuz(100, 50, (255,255,255))]
-        #sources = [FuenteDeLuz(373, 224, (150,0,0)),FuenteDeLuz(220, 448, (0,0,150)),FuenteDeLuz(128, 133, (255,255,255))]        
-        # boundarys = [Line(200,400,450,400),Line(200,100,450,100),Line(200,100,200,400),Line(400,100,400,400)]
-        #boundarys = [Borde(200,99,200,401,False),Borde(400,99,400,401,False),Borde(0,100,401,100,False),Borde(0,400,401,400,False)]
-        #boundarys = [Borde(200,200,400,200,False), Borde(200,400,400,400,False), Borde(200,200,200,400,False), Borde(400,200,400,400,False)]
-        '''
-        boundarys = [Borde(303, 146, 325, 146, True),
-                    Borde(14, 23, 173, 23, True), 
-                    Borde(14, 23, 14, 256, True), 
-                    Borde(14, 256, 77, 256, True), 
-                    Borde(77, 256, 77,483, True),  
-                    Borde(77,483, 362, 483, True), 
-                    Borde(362, 333, 362, 483, True), 
-                    Borde(362, 333, 488, 333, True), 
-                    Borde(488, 23, 488, 333, True), 
-                    Borde(267, 23, 488, 23, True), 
-                    Borde(267, 23, 267, 248, True), 
-                    Borde(267, 248, 267, 369, True),
-                    Borde(173, 248, 173,369 , True),
-                    Borde(173, 23, 173, 248, True), 
-                    Borde(173, 248, 267, 248, True)]
-        '''
+        #sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255)), FuenteDeLuz(150, 150, (210,85,20)),  FuenteDeLuz(160, 160, (210,85,20)), FuenteDeLuz(440, 440, (255,255,255))]     #,FuenteDeLuz(161, 358, (210,150,20))
+        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255))] 
 
-        sources = [FuenteDeLuz(86, 358, (210,85,20)),FuenteDeLuz(411, 226, (210,85,20)),FuenteDeLuz(362, 33, (255,255,255))]     #,FuenteDeLuz(161, 358, (210,150,20))
-        #sources = [FuenteDeLuz(86, 358, (255,255,255)),FuenteDeLuz(411, 226, (255,255,255)),FuenteDeLuz(362, 33, (255,255,255))] #,FuenteDeLuz(161, 358, (255,255,255))
-
-        '''
-        boundarys = [Borde(69, 325, 69, 500, False),
-                    Borde(69, 325, 94, 325, False),
-                    Borde(94, 325, 94, 58, False),
-                    Borde(94, 58, 219, 58, False),
-                    Borde(219, 58, 219, 25, False),
-                    Borde(219, 25, 319, 25, False),
-                    Borde(319, 25, 319, 0, False),
-                    Borde(405, 0, 405, 25, False),
-                    Borde(405, 25, 499, 25, False),
-                    Borde(180, 500, 180, 325, False),
-                    Borde(180, 325, 156, 325, False),
-                    Borde(156, 325, 156, 241, False),
-                    Borde(156, 241, 219, 241, False),
-                    Borde(219, 241, 219, 474, False),
-                    Borde(219, 474, 499, 474, False),
-                    Borde(230, 307, 319, 307, False),
-                    Borde(319, 307, 319, 358, False),
-                    Borde(230, 307, 230, 358, False),
-                    Borde(230, 358, 319, 358, False),
-                    Borde(405, 307, 499, 307, False),
-                    Borde(405, 307, 405, 358, False),
-                    Borde(405, 358, 499, 358, False),
-                    Borde(280, 141, 319, 141, False),
-                    Borde(319, 141, 319, 192, False),
-                    Borde(280, 141, 280, 192, False),
-                    Borde(280, 192, 319, 192, False),
-                    Borde(405, 141, 444, 141, False),
-                    Borde(444, 141, 444, 192, False),
-                    Borde(405, 141, 405, 192, False),
-                    Borde(405, 192, 444, 192, False),
-                    Borde(121, 347, 145, 347, True)
-                    ]
-        '''
         boundarys = [Borde(74, 499, 74, 332, False),
                     Borde(74, 332, 100, 332, False),
                     Borde(100, 332, 100, 66, False),
@@ -402,7 +344,6 @@ class PathTracing:
             npimage=(px)
             surface = pygame.surfarray.make_surface(npimage)
             #b = Boundary(350,100,350,400)
-       
     
             if first:
                 t = threading.Thread(target = self.iluminar, args=(sources,px,boundarys,surface,0,360,ref) ) # f being the function that tells how the ball should move
@@ -418,6 +359,5 @@ class PathTracing:
         
       
         
-
 p = PathTracing()
 p.main()
